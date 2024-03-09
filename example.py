@@ -1,22 +1,28 @@
 # Copyright (c) Meta Platforms, Inc. and affiliates.
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-
+import os
 from typing import Optional
+from timeit import default_timer as timer
+from datetime import timedelta
 
 import fire
+import torch
 
 from llama import Llama
 
 
 def main(
-    ckpt_dir: str,
-    tokenizer_path: str,
+    ckpt_dir: str = os.path.join(os.path.realpath(), 'llm_model'),
+    tokenizer_path: str = os.path.join(os.path.realpath(), 'llm_model', 'tokenizer.model'),
     temperature: float = 0.2,
     top_p: float = 0.95,
     max_seq_len: int = 512,
-    max_batch_size: int = 8,
+    max_batch_size: int = 4,
     max_gen_len: Optional[int] = None,
 ):
+    start = timer()
+    print(f"Have cuda?: {torch.cuda.is_available()}")
+
     generator = Llama.build(
         ckpt_dir=ckpt_dir,
         tokenizer_path=tokenizer_path,
@@ -28,7 +34,13 @@ def main(
         [
             {
                 "role": "user",
-                "content": "Provide C code for calucating a fionacci sequence",
+                "content": "Write a C code function for calculating a fibonacci sequence.",
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Also provide an answer in C#.",
             }
         ],
        # [
@@ -56,13 +68,14 @@ def main(
     )
 
     for instruction, result in zip(instructions, results):
-        for msg in instruction:
-            print(f"{msg['role'].capitalize()}: {msg['content']}\n")
-        print(
-            f"> {result['generation']['role'].capitalize()}: {result['generation']['content']}"
-        )
-        print("\n==================================\n")
-
+        print(result['generation']['content'])
+        #for msg in instruction:
+        #    print(f"{msg['role'].capitalize()}: {msg['content']}\n")
+        #print(
+        #    f"> {result['generation']['role'].capitalize()}: {result['generation']['content']}"
+        #)
+        #print("\n==================================\n")
+    print(f"Elapsed Time (sec): { timedelta(seconds=(timer()-start)) }")
 
 if __name__ == "__main__":
     fire.Fire(main)
