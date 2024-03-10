@@ -1,0 +1,13 @@
+syntax="proto3";
+
+service PeachyServer {
+    rpc Submit (DiffRequest) returns (DiffResult);
+}
+
+message DiffRequest {
+    string Request=1;
+}
+
+message DiffResult {
+    string Result=1;
+}
