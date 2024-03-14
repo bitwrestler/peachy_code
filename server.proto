@@ -1,13 +1,19 @@
 syntax="proto3";
 
+//Server implementation that starts the model and listens for requests 
 service PeachyServer {
+    //Submit a request (prompt) to the server
     rpc Submit (DiffRequest) returns (DiffResult);
 }
 
+//The Request message
 message DiffRequest {
+    //Request prompt string
     string Request=1;
 }
 
+//The Response message
 message DiffResult {
+    //String array result
     repeated string Result=1;
 }

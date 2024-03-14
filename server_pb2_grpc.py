@@ -6,7 +6,8 @@ import server_pb2 as server__pb2
 
 
 class PeachyServerStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Server implementation that starts the model and listens for requests 
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -22,10 +23,12 @@ class PeachyServerStub(object):
 
 
 class PeachyServerServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Server implementation that starts the model and listens for requests 
+    """
 
     def Submit(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Submit a request (prompt) to the server
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -46,7 +49,8 @@ def add_PeachyServerServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class PeachyServer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Server implementation that starts the model and listens for requests 
+    """
 
     @staticmethod
     def Submit(request,

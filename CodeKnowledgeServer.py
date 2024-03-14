@@ -3,6 +3,7 @@ import grpc
 from concurrent import futures
 import server_pb2_grpc
 from server_pb2 import DiffResult
+from ServerCommon import LISTEN_IF_PORT
 from llama import Llama
 
 
@@ -19,7 +20,12 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
             max_batch_size=4
         )
         self.server = grpc.server(futures.ProcessPoolExecutor(max_workers=1))
+        self.server.add_insecure_port(LISTEN_IF_PORT)
     
+    def Start(self):
+        self.server.start()
+        self.server.wait_for_termination()
+
     def Submit(self, request, context):
         results = self.generator.chat_completion(
             [request.Request],
