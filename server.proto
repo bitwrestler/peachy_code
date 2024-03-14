@@ -9,5 +9,5 @@ message DiffRequest {
 }
 
 message DiffResult {
-    string Result=1;
+    repeated string Result=1;
 }
