@@ -4,6 +4,7 @@ syntax="proto3";
 service PeachyServer {
     //Submit a request (prompt) to the server
     rpc Submit (DiffRequest) returns (DiffResult);
+    rpc Shutdown(Empty) returns (Empty);
 }
 
 //The Request message
@@ -17,3 +18,5 @@ message DiffResult {
     //String array result
     repeated string Result=1;
 }
+
+message Empty {}

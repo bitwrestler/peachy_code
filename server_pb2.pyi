@@ -16,3 +16,7 @@ class DiffResult(_message.Message):
     RESULT_FIELD_NUMBER: _ClassVar[int]
     Result: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, Result: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class Empty(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...

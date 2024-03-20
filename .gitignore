@@ -1,1 +1,3 @@
 llm_model
+__pychache__
+*.pyc
