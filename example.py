@@ -12,8 +12,8 @@ from llama import Llama
 
 
 def main(
-    ckpt_dir: str = os.path.join(os.path.realpath(), 'llm_model'),
-    tokenizer_path: str = os.path.join(os.path.realpath(), 'llm_model', 'tokenizer.model'),
+    ckpt_dir: str = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'llm_model'),
+    tokenizer_path: str = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'llm_model', 'tokenizer.model'),
     temperature: float = 0.2,
     top_p: float = 0.95,
     max_seq_len: int = 512,
