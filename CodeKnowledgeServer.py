@@ -2,7 +2,7 @@ import os
 import grpc
 from concurrent import futures
 import server_pb2_grpc
-from server_pb2 import DiffResult
+from server_pb2 import DiffResult, DiffRequest, PromptItem, PromptType
 from ServerCommon import LISTEN_IF_PORT,DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT
 from llama import Llama
 from collections import namedtuple
@@ -37,10 +37,23 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         self.server.start()
         self.server.wait_for_termination()
 
-    def Submit(self, request, context):
+    @staticmethod
+    def ConvertRole(role : PromptType) -> str:
+        if role == PromptType.PromptType_SYSTEM:
+            return "system"
+        else:
+            return "user"
+
+    def ConvertItem(self, item : PromptItem):
+        return {"role" : CodeKnowledgeServer.ConvertRole(item.Type), "content" : item.Prompt}
+
+    def ConvertPromptsToInstructions(self, request : DiffRequest):
+        return [self.ConvertItem(i) for i in request.Request]
+
+    def Submit(self, request : DiffRequest, context):
         if self.generator:
             results = self.generator.chat_completion(
-                [request.Request],
+                self.ConvertPromptsToInstructions(request),
                 max_gen_len=self.DEFAULT_GEN_LEN,
                 temperature=self.DEFAULT_TEMPERATURE,
                 top_p=self.DEFAULT_THRESHOLD
