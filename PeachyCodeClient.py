@@ -15,7 +15,7 @@ def makeRequestSingle(line : str) -> PromptItem:
     return PromptItem(Type=type, Prompt=line)
 
 def makeRequest(lines) -> DiffRequest:
-   req = [makeRequestSingle(i) for i in lines if not i.startwith("#")]
+   req = [makeRequestSingle(i) for i in lines if not i.startswith("#")]
    return DiffRequest(Request=req)
 
 def main(prompt : DiffRequest, ip : str) -> str:
