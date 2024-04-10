@@ -3,6 +3,7 @@ import argparse
 import grpc
 from server_pb2_grpc import PeachyServerStub 
 from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
+import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
 
