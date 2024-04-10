@@ -73,13 +73,14 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
                 temperature=self.DEFAULT_TEMPERATURE,
                 top_p=self.DEFAULT_THRESHOLD
             )
+            generator = None
             logging.info(f"Result -> {results}")
             return DiffResult(Result=[result['generation']['content'] for result in results])
         else:
             return DiffResult(Result=[])
 
     def Shutdown(self, request, context):
-        self.generator = None
+        self._single_generator = None
 
 class CodeKnowledgeServerFactory:
     def CreateServer(self, settings : ServerParams):
