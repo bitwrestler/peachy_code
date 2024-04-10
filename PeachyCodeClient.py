@@ -29,9 +29,11 @@ def main(prompt : DiffRequest, ip : str) -> DiffResult:
 
 def read_stdin():
     out = []
-    while select.select([sys.stdin,], [],[], 3.0)[0]:
+    while True:
+        if not select.select([sys.stdin,],[],[],2.0)[0]:
+            break
         line = sys.stdin.readline()
-        if line.rstrip() == ".":
+        if not line or line.rstrip() == ".":
             break
         out.append(line)
     return out
