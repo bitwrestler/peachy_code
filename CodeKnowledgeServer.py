@@ -4,7 +4,7 @@ import logging
 from concurrent import futures
 import server_pb2_grpc
 from server_pb2 import DiffResult, DiffRequest, PromptItem, PromptType
-from ServerCommon import LISTEN_IF_PORT,DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT
+from ServerCommon import LISTEN_IF_ADDR,DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT
 from llama import Llama
 from collections import namedtuple
 
@@ -50,7 +50,7 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
 
     def Submit(self, request, context):
         logging.info(f"Recieved Prompt: {request.Request[0].Prompt}")
-        if self.generator:
+        if False and self.generator:
             results = self.generator.chat_completion(
                 self.ConvertPromptsToInstructions(request),
                 max_gen_len=self.DEFAULT_GEN_LEN,
@@ -73,8 +73,8 @@ class CodeKnowledgeServerFactory:
         self.csServer.Start()
         self.rpcServer = grpc.server(futures.ProcessPoolExecutor(max_workers=2))
         server_pb2_grpc.add_PeachyServerServicer_to_server(self.csServer,self.rpcServer)
-        self.rpcServer.add_insecure_port(LISTEN_IF_PORT)
-        logging.info(f"gRPC server started on {LISTEN_IF_PORT}...")
+        self.rpcServer.add_insecure_port(LISTEN_IF_ADDR)
+        logging.info(f"gRPC server started on {LISTEN_IF_ADDR}...")
         self.rpcServer.start()
         logging.info(f"gRPC server listening...")
         self.rpcServer.wait_for_termination()

@@ -17,10 +17,11 @@ def makeRequest(lines) -> DiffRequest:
    req = [makeRequestSingle(i) for i in lines]
    return DiffRequest(Request=req)
 
-def main(prompt : DiffRequest) -> str:
-    with grpc.insecure_channel(LISTEN_IF_PORT) as channel:
+def main(prompt : DiffRequest, ip : str) -> str:
+    ip = f"{ip}:{LISTEN_IF_PORT}"
+    with grpc.insecure_channel(ip) as channel:
         proxy = PeachyServerStub(channel)
-        print(f"Sending: {prompt}")
+        print(f"Sending to {ip}: {prompt}")
         result : DiffResult = proxy.Submit( prompt )
         return result.Result
 
@@ -38,10 +39,11 @@ def parse_arg(arg : str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("PeachyCodeClient")
     parser.add_argument("prompt", help="code prompt", nargs='?')
+    parser.add_argument("ip", help="ip address of server (default to 127.0.0.1)", default='127.0.0.1', nargs='?')
     args = parser.parse_args()
     req = None
     if args.prompt:
         req = makeRequest(parse_arg(args.prompt))
     else:
         req = makeRequest(read_stdin())
-    print(main(req))
+    print(main(req,args.ip))
