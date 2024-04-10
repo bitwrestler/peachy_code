@@ -1,5 +1,6 @@
 import os
 import grpc
+import logging
 from concurrent import futures
 import server_pb2_grpc
 from server_pb2 import DiffResult, DiffRequest, PromptItem, PromptType
@@ -17,14 +18,13 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
 
     def __init__(self,settings : ServerParams):
         self.settings = settings
+        #self.server = rpcServer
         os.environ['LOCAL_WORLD_SIZE'] = str(settings.NUM_NODES)
         os.environ['WORLD_SIZE'] = os.environ['LOCAL_WORLD_SIZE']
         os.environ['LOCAL_RANK'] = str(0)
         os.environ['RANK'] = os.environ['LOCAL_RANK']
         os.environ['MASTER_ADDR'] = '127.0.0.1'
         os.environ['MASTER_PORT'] = '11002'
-        self.server = grpc.server(futures.ProcessPoolExecutor(max_workers=1))
-        self.server.add_insecure_port(LISTEN_IF_PORT)
     
     def Start(self):
         path = self.settings.LLM_DIR
@@ -34,8 +34,6 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
             max_seq_len=self.settings.SEQ_LEN,
             max_batch_size=self.settings.MAX_BATCH_SIZE
         )
-        self.server.start()
-        self.server.wait_for_termination()
 
     @staticmethod
     def ConvertRole(role : PromptType) -> str:
@@ -50,7 +48,8 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
     def ConvertPromptsToInstructions(self, request : DiffRequest):
         return [self.ConvertItem(i) for i in request.Request]
 
-    def Submit(self, request : DiffRequest, context):
+    def Submit(self, request, context):
+        logging.info(f"Recieved Prompt: {request.Request[0].Prompt}")
         if self.generator:
             results = self.generator.chat_completion(
                 self.ConvertPromptsToInstructions(request),
@@ -64,9 +63,24 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
 
     def Shutdown(self, request, context):
         self.generator = None
-        self.server.stop()
+        #if self.server:
+        #    self.server.stop()
+        #    self.server = None
+
+class CodeKnowledgeServerFactory:
+    def CreateServer(self, settings : ServerParams):
+        self.csServer = CodeKnowledgeServer(settings)
+        self.csServer.Start()
+        self.rpcServer = grpc.server(futures.ProcessPoolExecutor(max_workers=2))
+        server_pb2_grpc.add_PeachyServerServicer_to_server(self.csServer,self.rpcServer)
+        self.rpcServer.add_insecure_port(LISTEN_IF_PORT)
+        logging.info(f"gRPC server started on {LISTEN_IF_PORT}...")
+        self.rpcServer.start()
+        logging.info(f"gRPC server listening...")
+        self.rpcServer.wait_for_termination()
 
 if __name__ == "__main__":
+    logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
     server_params = ServerParams(os.path.dirname(os.path.realpath(__file__)))
-    server = CodeKnowledgeServer(server_params)
-    server.Start()
+    factory = CodeKnowledgeServerFactory()
+    factory.CreateServer(server_params)
