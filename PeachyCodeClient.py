@@ -18,13 +18,13 @@ def makeRequest(lines) -> DiffRequest:
    req = [makeRequestSingle(i) for i in lines if not i.startswith("#")]
    return DiffRequest(Request=req)
 
-def main(prompt : DiffRequest, ip : str) -> str:
+def main(prompt : DiffRequest, ip : str) -> DiffResult:
     ip = f"{ip}:{LISTEN_IF_PORT}"
     with grpc.insecure_channel(ip) as channel:
         proxy = PeachyServerStub(channel)
         print(f"Sending to {ip}: {prompt}")
         result : DiffResult = proxy.Submit( prompt )
-        return result.Result
+        return result
 
 def read_stdin():
     out = []
@@ -47,4 +47,4 @@ if __name__ == "__main__":
         req = makeRequest(parse_arg(args.prompt))
     else:
         req = makeRequest(read_stdin())
-    print(main(req,args.ip))
+    print(str(main(req,args.ip)))

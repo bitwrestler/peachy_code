@@ -1,6 +1,7 @@
 import os
 import grpc
 import logging
+import copy
 from concurrent import futures
 import server_pb2_grpc
 from server_pb2 import DiffResult, DiffRequest, PromptItem, PromptType
@@ -28,7 +29,7 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
     
     def Start(self):
         path = self.settings.LLM_DIR
-        self.generator = Llama.build(
+        self._single_generator = Llama.build(
             ckpt_dir=os.path.join(path, self.settings.LLM_RELATIVE_DIR),
             tokenizer_path=os.path.join(path, self.settings.LLM_RELATIVE_DIR, self.settings.TOKENIZER_MODEL_FILE),
             max_seq_len=self.settings.SEQ_LEN,
@@ -43,7 +44,10 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
             return "user"
 
     def ConvertItem(self, item : PromptItem):
-        return {"role" : CodeKnowledgeServer.ConvertRole(item.Type), "content" : item.Prompt}
+        p = item.Prompt
+        if not p.endswith('.'):
+            p = p + '.'
+        return {"role" : CodeKnowledgeServer.ConvertRole(item.Type), "content" : p}
 
     def ConvertPromptsToInstructions(self, request : DiffRequest):
         currentList = []
@@ -55,14 +59,15 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
                 currentList = []
                 inSystem=0
             elif inSystem > 0:
-                raise Exception("System prompt types (if used at all) must alternate System -> User. Deteced mulitple sytsem types back to back")
+                raise Exception("System prompt types (if used at all) must alternate System and User. Detected mulitple System types back to back")
             else:
                 inSystem+=1
 
     def Submit(self, request : DiffRequest, context):
         logging.info(f"Recieved Prompt: {str(request)}")
-        if self.generator:
-            results = self.generator.chat_completion(
+        if self._single_generator:
+            generator = copy.deepcopy(self._single_generator)
+            results = generator.chat_completion(
                 list(self.ConvertPromptsToInstructions(request)),
                 max_gen_len=self.DEFAULT_GEN_LEN,
                 temperature=self.DEFAULT_TEMPERATURE,
