@@ -39,12 +39,15 @@ def parse_arg(arg : str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("PeachyCodeClient")
-    parser.add_argument("prompt", help="code prompt", nargs='?')
-    parser.add_argument("ip", help="ip address of server (default to 127.0.0.1)", default='127.0.0.1', nargs='?')
+    parser.add_argument("--prompt", help="code prompt", nargs=1)
+    parser.add_argument("--ip", help="ip address of server (default to 127.0.0.1)", default='127.0.0.1', nargs=1)
     args = parser.parse_args()
     req = None
     if args.prompt:
-        req = makeRequest(parse_arg(args.prompt))
+        req = makeRequest(parse_arg(args.prompt[0]))
     else:
         req = makeRequest(read_stdin())
-    print(str(main(req,args.ip)))
+    ip = args.ip
+    if isinstance(ip, list):
+        ip = ip[0]
+    print(str(main(req,ip)))
