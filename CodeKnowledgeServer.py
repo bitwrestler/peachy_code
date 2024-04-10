@@ -46,17 +46,29 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         return {"role" : CodeKnowledgeServer.ConvertRole(item.Type), "content" : item.Prompt}
 
     def ConvertPromptsToInstructions(self, request : DiffRequest):
-        return [self.ConvertItem(i) for i in request.Request]
+        currentList = []
+        inSystem = 0
+        for item in request.Request:
+            currentList.append(self.ConvertItem(item))
+            if item.Type == PromptType.PromptType_USER:
+                yield currentList
+                currentList = []
+                inSystem=0
+            elif inSystem > 0:
+                raise Exception("System prompt types (if used at all) must alternate System -> User. Deteced mulitple sytsem types back to back")
+            else:
+                inSystem+=1
 
     def Submit(self, request : DiffRequest, context):
         logging.info(f"Recieved Prompt: {str(request)}")
         if self.generator:
             results = self.generator.chat_completion(
-                self.ConvertPromptsToInstructions(request),
+                list(self.ConvertPromptsToInstructions(request)),
                 max_gen_len=self.DEFAULT_GEN_LEN,
                 temperature=self.DEFAULT_TEMPERATURE,
                 top_p=self.DEFAULT_THRESHOLD
             )
+            logging.info(f"Result -> {results}")
             return DiffResult(Result=[result['generation']['content'] for result in results])
         else:
             return DiffResult(Result=[])
