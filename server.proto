@@ -7,10 +7,23 @@ service PeachyServer {
     rpc Shutdown(Empty) returns (Empty);
 }
 
+enum PromptType {
+    PromptType_USER = 0;
+    PromptType_SYSTEM = 1;
+}
+
+//The Prompt item (prompt type and string value)
+message PromptItem {
+    //Prompt Type
+    PromptType Type=1;
+    //string prompt
+    string Prompt=2;
+}
+
 //The Request message
 message DiffRequest {
     //Request prompt string
-    string Request=1;
+    repeated PromptItem Request=1;
 }
 
 //The Response message
