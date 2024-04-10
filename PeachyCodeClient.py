@@ -1,4 +1,5 @@
 import sys
+import select
 import argparse
 import grpc
 from server_pb2_grpc import PeachyServerStub 
@@ -28,7 +29,8 @@ def main(prompt : DiffRequest, ip : str) -> DiffResult:
 
 def read_stdin():
     out = []
-    for line in sys.stdin:
+    while select.select([sys.stdin,], [],[], 3.0)[0]:
+        line = sys.stdin.readline()
         if line.rstrip() == ".":
             break
         out.append(line)
