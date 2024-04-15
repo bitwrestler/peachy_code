@@ -22,7 +22,7 @@ class PeachyServerStub(object):
                 )
         self.GPUStats = channel.unary_unary(
                 '/PeachyServer/GPUStats',
-                request_serializer=server__pb2.Empty.SerializeToString,
+                request_serializer=server__pb2.DiffRequest.SerializeToString,
                 response_deserializer=server__pb2.DiffResult.FromString,
                 )
         self.Shutdown = channel.unary_unary(
@@ -67,7 +67,7 @@ def add_PeachyServerServicer_to_server(servicer, server):
             ),
             'GPUStats': grpc.unary_unary_rpc_method_handler(
                     servicer.GPUStats,
-                    request_deserializer=server__pb2.Empty.FromString,
+                    request_deserializer=server__pb2.DiffRequest.FromString,
                     response_serializer=server__pb2.DiffResult.SerializeToString,
             ),
             'Shutdown': grpc.unary_unary_rpc_method_handler(
@@ -115,7 +115,7 @@ class PeachyServer(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/PeachyServer/GPUStats',
-            server__pb2.Empty.SerializeToString,
+            server__pb2.DiffRequest.SerializeToString,
             server__pb2.DiffResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -5,7 +5,6 @@ import grpc
 from timeit import default_timer as timer
 from server_pb2_grpc import PeachyServerStub 
 from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
-from server_pb2 import Empty as GRPCEmptyMessage
 import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
@@ -46,7 +45,9 @@ def rpccall_address(ip : str) -> grpc.Channel:
 def rpccall_GPUStats(ip : str) -> DiffResult:
     with rpccall_address(ip) as channel:
         proxy = PeachyServerStub(channel)
-        return proxy.GPUStats(GRPCEmptyMessage())
+        args = ['--query-gpu=gpu_name,utilization.gpu,memory.total,memory.used,memory.free', '--format=csv']
+        req = DiffRequest( Request=[PromptItem(Type=PromptType.PromptType_USER, Prompt=a) for a in args] )
+        return proxy.GPUStats(req)
 
 def main(prompt : DiffRequest, ip : str) -> DiffResult:
     with rpccall_address(ip) as channel:

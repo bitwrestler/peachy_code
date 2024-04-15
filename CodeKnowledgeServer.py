@@ -81,9 +81,11 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         else:
             return DiffResult(Result=[])
 
-    def GPUStats(self, request, context):
+    def GPUStats(self, request : DiffRequest, context):
         logging.info("Received GPUStats request")
-        p = subprocess.Popen(['nvidia-smi'], stdout=subprocess.PIPE)
+        statsargs = [args.Prompt for args in request.Request]
+        statsargs.insert(0,'nvidia-smi')
+        p = subprocess.Popen(statsargs, stdout=subprocess.PIPE)
         allines = [l for l in io.TextIOWrapper(p.stdout, encoding='utf-8')]
         return DiffResult(Result=allines)
 
