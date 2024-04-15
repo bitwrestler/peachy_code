@@ -2,6 +2,7 @@ import sys
 import select
 import argparse
 import grpc
+from timeit import default_timer as timer
 from server_pb2_grpc import PeachyServerStub 
 from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
 import server_pb2_pyi_extensions
@@ -73,4 +74,7 @@ if __name__ == "__main__":
     if isinstance(ip, list):
         ip = ip[0]
     #print(req)
+    start = timer()
     print(str(main(req,ip)))
+    end = timer()
+    print( str(end-start) + " elapsed seconds"  )
