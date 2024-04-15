@@ -7,7 +7,6 @@ from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
 import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
-
 def makeRequestSingle(line : str) -> PromptItem:
     type = PromptType.PromptType_USER
     if line[0] == "~":
@@ -16,7 +15,26 @@ def makeRequestSingle(line : str) -> PromptItem:
     return PromptItem(Type=type, Prompt=line)
 
 def makeRequest(lines) -> DiffRequest:
-   req = [makeRequestSingle(i) for i in lines if len(i.strip()) > 0 and (not i.startswith("#"))]
+   parsedlines = []
+   tmpLine = ""
+   slurpLine = False
+   for aline in lines:
+       if len(aline.strip()) == 0:
+            continue
+       if aline.startswith("#"):
+           continue
+       if slurpLine:
+            tmpLine = tmpLine + aline
+       else:
+           tmpLine = aline
+       if tmpLine.rstrip().endswith("\\"):
+           tmpLine = tmpLine.replace("\\\n", "\n")
+           slurpLine = True
+           continue
+       else:
+           slurpLine = False
+       parsedlines.append(tmpLine)
+   req = [makeRequestSingle(i) for i in parsedlines]
    return DiffRequest(Request=req)
 
 def main(prompt : DiffRequest, ip : str) -> DiffResult:
@@ -54,4 +72,5 @@ if __name__ == "__main__":
     ip = args.ip
     if isinstance(ip, list):
         ip = ip[0]
+    #print(req)
     print(str(main(req,ip)))
