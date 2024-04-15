@@ -2,6 +2,8 @@ import os
 import grpc
 import logging
 import copy
+import io
+import subprocess
 from concurrent import futures
 import server_pb2_grpc
 from server_pb2 import DiffResult, DiffRequest, PromptItem, PromptType
@@ -79,6 +81,12 @@ class CodeKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         else:
             return DiffResult(Result=[])
 
+    def GPUStats(self, request, context):
+        logging.info("Received GPUStats request")
+        p = subprocess.Popen(['nvidia-smi'], stdout=subprocess.PIPE)
+        allines = [l for l in io.TextIOWrapper(p.stdout, encoding='utf-8')]
+        return DiffResult(Result=allines)
+
     def Shutdown(self, request, context):
         self._single_generator = None
 
@@ -86,7 +94,7 @@ class CodeKnowledgeServerFactory:
     def CreateServer(self, settings : ServerParams):
         self.csServer = CodeKnowledgeServer(settings)
         self.csServer.Start()
-        self.rpcServer = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+        self.rpcServer = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
         server_pb2_grpc.add_PeachyServerServicer_to_server(self.csServer,self.rpcServer)
         self.rpcServer.add_insecure_port(LISTEN_IF_ADDR)
         logging.info(f"gRPC server started on {LISTEN_IF_ADDR}...")

@@ -4,6 +4,9 @@ syntax="proto3";
 service PeachyServer {
     //Submit a request (prompt) to the server
     rpc Submit (DiffRequest) returns (DiffResult);
+    //Return the currently running nvidia-smi stats
+    rpc GPUStats(Empty) returns (DiffResult);
+    //Request shutdown the server
     rpc Shutdown(Empty) returns (Empty);
 }
 

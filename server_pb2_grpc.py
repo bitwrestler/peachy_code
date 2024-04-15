@@ -20,6 +20,11 @@ class PeachyServerStub(object):
                 request_serializer=server__pb2.DiffRequest.SerializeToString,
                 response_deserializer=server__pb2.DiffResult.FromString,
                 )
+        self.GPUStats = channel.unary_unary(
+                '/PeachyServer/GPUStats',
+                request_serializer=server__pb2.Empty.SerializeToString,
+                response_deserializer=server__pb2.DiffResult.FromString,
+                )
         self.Shutdown = channel.unary_unary(
                 '/PeachyServer/Shutdown',
                 request_serializer=server__pb2.Empty.SerializeToString,
@@ -38,8 +43,16 @@ class PeachyServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GPUStats(self, request, context):
+        """Return the currently running nvidia-smi stats
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def Shutdown(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Request shutdown the server
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -50,6 +63,11 @@ def add_PeachyServerServicer_to_server(servicer, server):
             'Submit': grpc.unary_unary_rpc_method_handler(
                     servicer.Submit,
                     request_deserializer=server__pb2.DiffRequest.FromString,
+                    response_serializer=server__pb2.DiffResult.SerializeToString,
+            ),
+            'GPUStats': grpc.unary_unary_rpc_method_handler(
+                    servicer.GPUStats,
+                    request_deserializer=server__pb2.Empty.FromString,
                     response_serializer=server__pb2.DiffResult.SerializeToString,
             ),
             'Shutdown': grpc.unary_unary_rpc_method_handler(
@@ -81,6 +99,23 @@ class PeachyServer(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/PeachyServer/Submit',
             server__pb2.DiffRequest.SerializeToString,
+            server__pb2.DiffResult.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GPUStats(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/PeachyServer/GPUStats',
+            server__pb2.Empty.SerializeToString,
             server__pb2.DiffResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

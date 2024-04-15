@@ -5,6 +5,7 @@ import grpc
 from timeit import default_timer as timer
 from server_pb2_grpc import PeachyServerStub 
 from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
+from server_pb2 import Empty as GRPCEmptyMessage
 import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
@@ -38,9 +39,17 @@ def makeRequest(lines) -> DiffRequest:
    req = [makeRequestSingle(i) for i in parsedlines]
    return DiffRequest(Request=req)
 
-def main(prompt : DiffRequest, ip : str) -> DiffResult:
+def rpccall_address(ip : str) -> grpc.Channel:
     ip = f"{ip}:{LISTEN_IF_PORT}"
-    with grpc.insecure_channel(ip) as channel:
+    return grpc.insecure_channel(ip)
+
+def rpccall_GPUStats(ip : str) -> DiffResult:
+    with rpccall_address(ip) as channel:
+        proxy = PeachyServerStub(channel)
+        return proxy.GPUStats(GRPCEmptyMessage())
+
+def main(prompt : DiffRequest, ip : str) -> DiffResult:
+    with rpccall_address(ip) as channel:
         proxy = PeachyServerStub(channel)
         print(f"Sending to {ip}: {prompt}")
         result : DiffResult = proxy.Submit( prompt )
@@ -64,17 +73,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("PeachyCodeClient")
     parser.add_argument("--prompt", help="code prompt", nargs=1)
     parser.add_argument("--ip", help="ip address of server (default to 127.0.0.1)", default='127.0.0.1', nargs=1)
+    parser.add_argument("--stats", help="Print CPU/GPU stats of server", action='store_true')
     args = parser.parse_args()
-    req = None
-    if args.prompt:
-        req = makeRequest(parse_arg(args.prompt[0]))
-    else:
-        req = makeRequest(read_stdin())
+    callable_routine = None
     ip = args.ip
     if isinstance(ip, list):
         ip = ip[0]
-    #print(req)
+    if args.stats:
+        callable_routine = lambda: rpccall_GPUStats(ip)
+    else:
+        req = None
+        if args.prompt:
+            req = makeRequest(parse_arg(args.prompt[0]))
+        else:
+            req = makeRequest(read_stdin())
+        callable_routine = lambda: str(main(req,ip))
     start = timer()
-    print(str(main(req,ip)))
+    print(callable_routine())
     end = timer()
     print( str(end-start) + " elapsed seconds"  )
