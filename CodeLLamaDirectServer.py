@@ -54,7 +54,7 @@ class CodeLLamaDirectServer(IKnowledgeServer):
                 inSystem+=1
 
     def Submit(self, request : DiffRequest, context):
-        logging.info(f"Recieved Prompt: {str(request)}")
+        super().Submit(request, context)
         if self._single_generator:
             generator = copy.deepcopy(self._single_generator)
             results = generator.chat_completion(
