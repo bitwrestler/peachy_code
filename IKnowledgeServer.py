@@ -2,7 +2,7 @@ import subprocess
 import logging
 import server_pb2_grpc
 import server_pb2
-from server_pb2 import PromptType
+from server_pb2 import PromptType, DiffRequest
 
 """
 Abstract server class
@@ -30,3 +30,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
             return "system"
         else:
             return "user"
+    
+    def Submit(self, request : DiffRequest, context):
+        logging.info(f"Recieved Prompt: {str(request)}")
+        return None
