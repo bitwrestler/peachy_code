@@ -25,5 +25,6 @@ class CodeKnowledgeServerFactory:
 if __name__ == "__main__":
     logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
     server_params = ServerParams(os.path.dirname(os.path.realpath(__file__)))
+    logging.info(f"ServerParams -> {server_params}")
     factory = CodeKnowledgeServerFactory()
     factory.CreateServer(server_params)
