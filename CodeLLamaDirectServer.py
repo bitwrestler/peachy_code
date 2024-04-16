@@ -12,7 +12,6 @@ from llama import Llama
 Server that uses direct PyTorch CodeLLama
 """
 class CodeLLamaDirectServer(IKnowledgeServer):
-    DEFAULT_TEMPERATURE = 0.2
     DEFAULT_GEN_LEN = 512
     DEFAULT_THRESHOLD = 0.95
 
