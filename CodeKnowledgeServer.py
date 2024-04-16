@@ -37,12 +37,13 @@ class CodeKnowledgeServerFactory:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("CodeKnowledgeServer")
     parser.add_argument("--ollama", help="Use OLLama backend", action='store_true')
+    parser.add_argument("--arg", help="Optional argument to pass to server creation", default=None)
     args = parser.parse_args()
     st = ServerType.CODE_LLAMA_DIRECT
     if args.ollama:
         st = ServerType.CODE_LLAMA_OLLAMA
     logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
-    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st)
+    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg)
     logging.info(f"ServerParams -> {server_params}")
     factory = CodeKnowledgeServerFactory()
     factory.CreateServer(server_params)

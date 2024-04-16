@@ -13,5 +13,5 @@ class ServerType(Enum):
 
 DEFAULT_SERVER_TYPE = ServerType.CODE_LLAMA_DIRECT
     
-ServerParams = namedtuple('ServerParams',['LLM_DIR','server_type','LLM_RELATIVE_DIR','TOKENIZER_MODEL_FILE','SEQ_LEN','MAX_BATCH_SIZE','NUM_NODES'], 
-                          defaults=[None,DEFAULT_SERVER_TYPE,'llm_model','tokenizer.model',DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT])
+ServerParams = namedtuple('ServerParams',['LLM_DIR','server_type','server_arg','LLM_RELATIVE_DIR','TOKENIZER_MODEL_FILE','SEQ_LEN','MAX_BATCH_SIZE','NUM_NODES'], 
+                          defaults=[None,DEFAULT_SERVER_TYPE,None,'llm_model','tokenizer.model',DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT])
