@@ -24,7 +24,7 @@ class PeachyCodeServerFactory:
             raise Exception(f"Unknown server type {settings.server_type}")
 
     def CreateServer(self, settings : ServerParams):
-        self.csServer =  CodeKnowledgeServerFactory._createServer(settings)
+        self.csServer =  PeachyCodeServerFactory._createServer(settings)
         self.csServer.Start()
         self.rpcServer = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
         server_pb2_grpc.add_PeachyServerServicer_to_server(self.csServer,self.rpcServer)
