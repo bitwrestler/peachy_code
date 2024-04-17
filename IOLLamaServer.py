@@ -15,6 +15,7 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     def __init__(self, settings : ServerParams):
         ollama_host = settings.server_arg or IOLLamaServer.DEFUALT_OLLAMA_HOST
         self.ollama_url = f'http://{ollama_host}/api/'
+        self.temperature = settings.TEMPERATURE
 
     @staticmethod
     def toJSON(data : dict) -> str:
@@ -48,6 +49,9 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     def initRequest(self):
         d = {'model' : self.ModelName() }
         return d
+
+    def Temperature(self):
+        return self.temperature
 
     def _makeRequest(self, request : DiffRequest) -> dict:
         system = '.'.join([rp.Prompt for rp in request.Request if rp.Type == PromptType.PromptType_SYSTEM])

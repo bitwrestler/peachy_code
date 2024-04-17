@@ -3,12 +3,12 @@ import logging
 import server_pb2_grpc
 import server_pb2
 from server_pb2 import PromptType, DiffRequest
+from ServerCommon import DEFAULT_TEMPERATURE
 
 """
 Abstract server class
 """
 class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
-    DEFAULT_TEMPERATURE = 0.2
 
     def Start(self):
         raise NotImplementedError('Method not implemented!')
@@ -22,7 +22,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         return server_pb2.DiffResult(Result=allines)
     
     def Temperature(self):
-        return IKnowledgeServer.DEFAULT_TEMPERATURE
+        return DEFAULT_TEMPERATURE
 
     @staticmethod
     def ConvertRole(role : PromptType) -> str:

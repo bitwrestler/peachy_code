@@ -39,6 +39,9 @@ class CodeLLamaDirectServer(IKnowledgeServer):
             p = p + '.'
         return {"role" : IKnowledgeServer.ConvertRole(item.Type), "content" : p}
 
+    def Temperature(self):
+        return self.settings.TEMPERATURE
+
     def ConvertPromptsToInstructions(self, request : DiffRequest):
         currentList = []
         inSystem = 0
@@ -60,7 +63,7 @@ class CodeLLamaDirectServer(IKnowledgeServer):
             results = generator.chat_completion(
                 list(self.ConvertPromptsToInstructions(request)),
                 max_gen_len=self.DEFAULT_GEN_LEN,
-                temperature=self.DEFAULT_TEMPERATURE,
+                temperature=self.Temperature(),
                 top_p=self.DEFAULT_THRESHOLD
             )
             generator = None

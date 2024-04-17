@@ -5,7 +5,7 @@ import argparse
 from concurrent import futures
 import server_pb2_grpc
 import server_pb2_pyi_extensions
-from ServerCommon import ServerParams, ServerType , LISTEN_IF_ADDR
+from ServerCommon import ServerParams, ServerType , LISTEN_IF_ADDR, DEFAULT_TEMPERATURE
 from CodeLLamaDirectServer import CodeLLamaDirectServer
 from CodeLLamaOLLamaServer import CodeLLamaOLLamaServer
 
@@ -38,12 +38,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("CodeKnowledgeServer")
     parser.add_argument("--ollama", help="Use OLLama backend", action='store_true')
     parser.add_argument("--arg", help="Optional argument to pass to server creation", default=None)
+    parser.add_argument("--temperature", help="Temperature (creativty threshold) of model", default=DEFAULT_TEMPERATURE)
     args = parser.parse_args()
     st = ServerType.CODE_LLAMA_DIRECT
     if args.ollama:
         st = ServerType.CODE_LLAMA_OLLAMA
     logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
-    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg)
+    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg, TEMPERATURE=args.temperature)
     logging.info(f"ServerParams -> {server_params}")
     factory = PeachyCodeServerFactory()
     factory.CreateServer(server_params)
