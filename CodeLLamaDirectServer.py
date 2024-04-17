@@ -16,7 +16,7 @@ class CodeLLamaDirectServer(IKnowledgeServer):
     DEFAULT_THRESHOLD = 0.95
 
     def __init__(self,settings : ServerParams):
-        self.settings = settings
+        super().__init__(settings)
         os.environ['LOCAL_WORLD_SIZE'] = str(settings.NUM_NODES)
         os.environ['WORLD_SIZE'] = os.environ['LOCAL_WORLD_SIZE']
         os.environ['LOCAL_RANK'] = str(0)
@@ -38,9 +38,6 @@ class CodeLLamaDirectServer(IKnowledgeServer):
         if not p.endswith('.'):
             p = p + '.'
         return {"role" : IKnowledgeServer.ConvertRole(item.Type), "content" : p}
-
-    def Temperature(self):
-        return self.settings.TEMPERATURE
 
     def ConvertPromptsToInstructions(self, request : DiffRequest):
         currentList = []
