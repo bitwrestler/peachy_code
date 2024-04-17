@@ -12,7 +12,7 @@ from CodeLLamaOLLamaServer import CodeLLamaOLLamaServer
 """
 Server Factory for starting code server
 """
-class CodeKnowledgeServerFactory:
+class PeachyCodeServerFactory:
     
     @staticmethod
     def _createServer(settings : ServerParams):
@@ -45,5 +45,5 @@ if __name__ == "__main__":
     logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
     server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg)
     logging.info(f"ServerParams -> {server_params}")
-    factory = CodeKnowledgeServerFactory()
+    factory = PeachyCodeServerFactory()
     factory.CreateServer(server_params)
