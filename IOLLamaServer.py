@@ -31,7 +31,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     def assertResponse(res):
         print(res.text)
         resDict = IOLLamaServer.fromJSON(res.text)
-        print(resDict)
         if not resDict['done']:
             raise Exception("Starting model failed")        
         return resDict
