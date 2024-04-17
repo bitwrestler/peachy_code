@@ -11,7 +11,8 @@ Abstract class for an OLLama server proxy
 class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     DEFUALT_OLLAMA_HOST = '127.0.0.1:11434'
     DEFAULT_OLLAMA_CONTEXT = 65536
-    
+    CONST_VALID_DONE='done'
+
     def __init__(self, settings : ServerParams):
         ollama_host = settings.server_arg or IOLLamaServer.DEFUALT_OLLAMA_HOST
         self.ollama_url = f'http://{ollama_host}/api/'
@@ -32,8 +33,8 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     def assertResponse(res):
         print(res.text)
         resDict = IOLLamaServer.fromJSON(res.text)
-        if not resDict['done']:
-            raise Exception("Starting model failed")        
+        if (not IOLLamaServer.CONST_VALID_DONE in resDict) or (not resDict[IOLLamaServer.CONST_VALID_DONE]):
+            raise Exception(f"Ollama response invalid -> '{res.text}'")     
         return resDict
 
     def Start(self):
@@ -50,7 +51,7 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
         d = {'model' : self.ModelName() }
         return d
 
-    def Temperature(self):
+    def Temperature(self) -> float:
         return self.temperature
 
     def _makeRequest(self, request : DiffRequest) -> dict:

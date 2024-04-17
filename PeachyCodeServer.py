@@ -44,7 +44,7 @@ if __name__ == "__main__":
     if args.ollama:
         st = ServerType.CODE_LLAMA_OLLAMA
     logging.basicConfig(format='[%(asctime)s] %(levelname)s:%(message)s', level=logging.INFO)
-    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg, TEMPERATURE=args.temperature)
+    server_params = ServerParams(LLM_DIR=os.path.dirname(os.path.realpath(__file__)), server_type=st, server_arg=args.arg, TEMPERATURE=float(args.temperature))
     logging.info(f"ServerParams -> {server_params}")
     factory = PeachyCodeServerFactory()
     factory.CreateServer(server_params)

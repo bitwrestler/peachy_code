@@ -21,7 +21,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         allines = [l for l in io.TextIOWrapper(p.stdout, encoding='utf-8')]
         return server_pb2.DiffResult(Result=allines)
     
-    def Temperature(self):
+    def Temperature(self) -> float:
         return DEFAULT_TEMPERATURE
 
     @staticmethod
