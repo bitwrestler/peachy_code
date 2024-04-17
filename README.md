@@ -1,4 +1,7 @@
 # Peachy Code - The Code Review assistant
+
+**WORK IN PROGRESS - DOES NOT DO A WHOLE LOT YET**
+
 This is a research project to explore the possiblity of using a local code-specific LLM to assist with code reviews. 
 
 It is a client-server architecture that supports direct loading of a codellama via PyTorch or can act as a proxy for Ollama.
