@@ -15,10 +15,12 @@ class ResponseType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     ResponseType_COMPLETE: _ClassVar[ResponseType]
     ResponseType_QUEUED: _ClassVar[ResponseType]
+    ResponseType_RUNNING: _ClassVar[ResponseType]
 PromptType_USER: PromptType
 PromptType_SYSTEM: PromptType
 ResponseType_COMPLETE: ResponseType
 ResponseType_QUEUED: ResponseType
+ResponseType_RUNNING: ResponseType
 
 class PromptItem(_message.Message):
     __slots__ = ("Type", "Prompt")

@@ -1,9 +1,9 @@
 import io
 import subprocess
 import logging
-import uuid
 import server_pb2_grpc
 import server_pb2
+from KnowledgeServerQueue import KnowledgeServerQueue
 from server_pb2 import PromptType, ResponseType ,DiffRequest, DiffResult, Empty
 from ServerCommon import ServerParams
 
@@ -14,6 +14,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
 
     def __init__(self,settings : ServerParams):
         self.settings = settings
+        self.q = KnowledgeServerQueue(queue_size=settings.NUM_NODES)
 
     def Start(self):
         raise NotImplementedError('Method not implemented!')
@@ -41,9 +42,12 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
 
     def Submit(self, request : DiffRequest, context) -> DiffResult:
         logging.info(f"Recieved Prompt: {str(request)}")
-        res = DiffResult(ResultID=str(uuid.uuid4()), ResultType=ResponseType.ResponseType_COMPLETE)
-        self._Submit(request, res)
-        logging.info(f"Result -> {res}")
+        try:
+            #TODO install queue
+            self._Submit(request, res)
+            logging.info(f"Result -> {res}")
+        finally:
+            self.q.RecordCompletion()
         return res
 
     def ChangeSettings(self, request : server_pb2.Settings, context):
