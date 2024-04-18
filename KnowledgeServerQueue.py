@@ -16,7 +16,7 @@ class KnowledgeServerQueue:
         self.q = {}
 
     def canRun(self):
-        return len(self.q.items) < self.size
+        return len(self.q) < self.size
     
     def isQueued(self, id : str) -> bool:
         return id in self.q
