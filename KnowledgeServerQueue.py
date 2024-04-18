@@ -8,10 +8,11 @@ class KnowledgeServerQueue:
     def __init__(self, queue_size : int):
         self.size = queue_size
         self.lock = threading.Lock()
+        self.running_count = 0
         self.q = {}
 
     def canRun(self):
-        return len(self.q) < self.size
+        return self.running_count < self.size
     
     def isQueued(self, id : str) -> bool:
         return id in self.q
@@ -22,6 +23,7 @@ class KnowledgeServerQueue:
     def RemoveQueued(self, id : str):
         with self.lock:
             self._removeQueued(id)
+            self.running_count = self.running_count - 1
 
     @staticmethod
     def _newID() -> str:
@@ -46,21 +48,23 @@ class KnowledgeServerQueue:
                     logging.info("QUEUE: isQueued on IsStatusCheck")
                     if self.canRun():
                         logging.info("QUEUE: canRun on isQueued on IsStatusCheck")
-                        self._removeQueued(request.ResultID)
-                        return (False, KnowledgeServerQueue.initResult(id=request.ResultID))
+                        self.running_count = self.running_count + 1
+                        return (True, KnowledgeServerQueue.initResult(id=request.ResultID))
                     else:
                         logging.info("QUEUE: not canRun on isQueued on IsStatusCheck")
                         e = self.q[request.ResultID]
-                        return (True, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
+                        return (False, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
                 else:
                     logging.info("QUEUE: not id queued on IsStatusCheck")
-                    return (False, KnowledgeServerQueue.initResult(id=request.ResultID))
+                    #this should not impact running_count and COULD be an exception
+                    return (True, KnowledgeServerQueue.initResult(id=request.ResultID))
             else:
                 logging.info("QUEUE: not IsStatusCheck")
                 if self.canRun():
                     logging.info("QUEUE: canRun")
                     tmpres = self.queueIt(request)
-                    return(False, KnowledgeServerQueue.initResult(id=tmpres.ResultID))
+                    self.running_count = self.running_count + 1
+                    return(True, KnowledgeServerQueue.initResult(id=tmpres.ResultID))
                 else:
                     logging.info("QUEUE: not canRun -> queued")
-                    return (True,self.queueIt(request))
+                    return (False,self.queueIt(request))
