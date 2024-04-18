@@ -8,6 +8,8 @@ service PeachyServer {
     rpc GPUStats(DiffRequest) returns (DiffResult);
     //Request shutdown the server
     rpc Shutdown(Empty) returns (Empty);
+    //Set server settings
+    rpc ChangeSettings(Settings) returns (Empty);
 }
 
 enum PromptType {
@@ -33,6 +35,12 @@ message DiffRequest {
 message DiffResult {
     //String array result
     repeated string Result=1;
+}
+
+//Settings message for changing the server settings from the client
+message Settings {
+    //float value to set the temperature of the server
+    float Temperature=1;
 }
 
 message Empty {}

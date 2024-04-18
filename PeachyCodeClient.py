@@ -1,10 +1,13 @@
 import sys
+import os
 import select
 import argparse
 import grpc
+import logging
+import datetime
 from timeit import default_timer as timer
 from server_pb2_grpc import PeachyServerStub 
-from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType
+from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType, Settings
 import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
@@ -49,10 +52,17 @@ def rpccall_GPUStats(ip : str) -> DiffResult:
         req = DiffRequest( Request=[PromptItem(Type=PromptType.PromptType_USER, Prompt=a) for a in args] )
         return proxy.GPUStats(req)
 
+def rpccall_ChangeTemperature(ip : str, newTemp : float):
+    with rpccall_address(ip) as channel:
+        proxy = PeachyServerStub(channel)
+        settingsChange = Settings(Temperature=newTemp)
+        proxy.ChangeSettings(settingsChange)
+
 def main(prompt : DiffRequest, ip : str) -> DiffResult:
     with rpccall_address(ip) as channel:
         proxy = PeachyServerStub(channel)
         print(f"Sending to {ip}: {prompt}")
+        logging.info("REQUEST -> " + str(prompt) + "\n")
         result : DiffResult = proxy.Submit( prompt )
         return result
 
@@ -71,10 +81,17 @@ def parse_arg(arg : str):
     return arg.splitlines(keepends=True)
 
 if __name__ == "__main__":
+    try:
+        os.mkdir('./log')
+    except:
+        pass
+    today = datetime.datetime.now().strftime('%Y%m%d')
+    logging.basicConfig(filename=f'./log/client{today}.log', format='[%(asctime)s] - %(message)s', level=logging.INFO)
     parser = argparse.ArgumentParser("PeachyCodeClient")
     parser.add_argument("--prompt", help="code prompt", nargs=1)
     parser.add_argument("--ip", help="ip address of server (default to 127.0.0.1)", default='127.0.0.1', nargs=1)
     parser.add_argument("--stats", help="Print CPU/GPU stats of server", action='store_true')
+    parser.add_argument("--temperature", help="Change the temperature of the server", default=None)
     args = parser.parse_args()
     callable_routine = None
     ip = args.ip
@@ -82,6 +99,9 @@ if __name__ == "__main__":
         ip = ip[0]
     if args.stats:
         callable_routine = lambda: rpccall_GPUStats(ip)
+    elif args.temperature is not None:
+        rpccall_ChangeTemperature(ip, float(args.temperature))
+        exit(0)
     else:
         req = None
         if args.prompt:
@@ -90,6 +110,9 @@ if __name__ == "__main__":
             req = makeRequest(read_stdin())
         callable_routine = lambda: str(main(req,ip))
     start = timer()
-    print(callable_routine())
+    res = callable_routine()
+    print(res)
+    logging.info(f"RESPONSE -> {res}\n")
     end = timer()
     print( str(end-start) + " elapsed seconds"  )
+    logging.shutdown()

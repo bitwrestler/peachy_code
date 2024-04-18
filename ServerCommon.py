@@ -1,4 +1,4 @@
-from collections import namedtuple
+from dataclasses import dataclass
 from enum import Enum
 
 LISTEN_IF_PORT="50301"
@@ -14,5 +14,14 @@ class ServerType(Enum):
 
 DEFAULT_SERVER_TYPE = ServerType.CODE_LLAMA_DIRECT
     
-ServerParams = namedtuple('ServerParams',['LLM_DIR','server_type','server_arg','LLM_RELATIVE_DIR','TOKENIZER_MODEL_FILE','SEQ_LEN','MAX_BATCH_SIZE','NUM_NODES','TEMPERATURE'], 
-                          defaults=[None,DEFAULT_SERVER_TYPE,None,'llm_model','tokenizer.model',DEFAULT_MAX_LEN,DEFAULT_BATCH_SIZE,DEFAULT_NODES_COUNT,DEFAULT_TEMPERATURE])
+@dataclass
+class ServerParams:
+    LLM_DIR : str = None
+    server_type : ServerType = DEFAULT_SERVER_TYPE
+    server_arg : str = None
+    LLM_RELATIVE_DIR : str = 'llm_model'
+    TOKENIZER_MODEL_FILE : str = 'tokenizer.model'
+    SEQ_LEN : int = DEFAULT_MAX_LEN
+    MAX_BATCH_SIZE : int = DEFAULT_BATCH_SIZE
+    NUM_NODES : int = DEFAULT_NODES_COUNT
+    TEMPERATURE : float = DEFAULT_TEMPERATURE

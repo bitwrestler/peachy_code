@@ -33,6 +33,12 @@ class DiffResult(_message.Message):
     Result: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, Result: _Optional[_Iterable[str]] = ...) -> None: ...
 
+class Settings(_message.Message):
+    __slots__ = ("Temperature",)
+    TEMPERATURE_FIELD_NUMBER: _ClassVar[int]
+    Temperature: float
+    def __init__(self, Temperature: _Optional[float] = ...) -> None: ...
+
 class Empty(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...

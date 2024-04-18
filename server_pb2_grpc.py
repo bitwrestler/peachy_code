@@ -30,6 +30,11 @@ class PeachyServerStub(object):
                 request_serializer=server__pb2.Empty.SerializeToString,
                 response_deserializer=server__pb2.Empty.FromString,
                 )
+        self.ChangeSettings = channel.unary_unary(
+                '/PeachyServer/ChangeSettings',
+                request_serializer=server__pb2.Settings.SerializeToString,
+                response_deserializer=server__pb2.Empty.FromString,
+                )
 
 
 class PeachyServerServicer(object):
@@ -57,6 +62,13 @@ class PeachyServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ChangeSettings(self, request, context):
+        """Set server settings
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_PeachyServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +85,11 @@ def add_PeachyServerServicer_to_server(servicer, server):
             'Shutdown': grpc.unary_unary_rpc_method_handler(
                     servicer.Shutdown,
                     request_deserializer=server__pb2.Empty.FromString,
+                    response_serializer=server__pb2.Empty.SerializeToString,
+            ),
+            'ChangeSettings': grpc.unary_unary_rpc_method_handler(
+                    servicer.ChangeSettings,
+                    request_deserializer=server__pb2.Settings.FromString,
                     response_serializer=server__pb2.Empty.SerializeToString,
             ),
     }
@@ -133,6 +150,23 @@ class PeachyServer(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/PeachyServer/Shutdown',
             server__pb2.Empty.SerializeToString,
+            server__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ChangeSettings(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/PeachyServer/ChangeSettings',
+            server__pb2.Settings.SerializeToString,
             server__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
