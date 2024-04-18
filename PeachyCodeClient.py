@@ -20,6 +20,9 @@ def makeRequestSingle(line : str) -> PromptItem:
 
 def makeRequest(lines) -> DiffRequest:
    parsedlines = []
+   if (lines is None) or len(lines) == 0:
+       return None
+   
    tmpLine = ""
    slurpLine = False
    for aline in lines:
@@ -58,7 +61,7 @@ def rpccall_ChangeTemperature(ip : str, newTemp : float):
         settingsChange = Settings(Temperature=newTemp)
         proxy.ChangeSettings(settingsChange)
 
-def main(prompt : DiffRequest, ip : str) -> DiffResult:
+def rpccall_Prompt(prompt : DiffRequest, ip : str) -> DiffResult:
     with rpccall_address(ip) as channel:
         proxy = PeachyServerStub(channel)
         print(f"Sending to {ip}: {prompt}")
@@ -99,20 +102,23 @@ if __name__ == "__main__":
         ip = ip[0]
     if args.stats:
         callable_routine = lambda: rpccall_GPUStats(ip)
-    elif args.temperature is not None:
-        rpccall_ChangeTemperature(ip, float(args.temperature))
-        exit(0)
     else:
+        if args.temperature is not None:
+            rpccall_ChangeTemperature(ip, float(args.temperature))
+            
         req = None
         if args.prompt:
             req = makeRequest(parse_arg(args.prompt[0]))
         else:
             req = makeRequest(read_stdin())
-        callable_routine = lambda: str(main(req,ip))
-    start = timer()
-    res = callable_routine()
-    print(res)
-    logging.info(f"RESPONSE -> {res}\n")
-    end = timer()
-    print( str(end-start) + " elapsed seconds"  )
+        if req:
+            callable_routine = lambda: str(rpccall_Prompt(req,ip))
+    if callable_routine:
+        start = timer()
+        res = callable_routine()
+        print(res)
+        logging.info(f"RESPONSE -> {res}\n")
+        end = timer()
+        print( str(end-start) + " elapsed seconds"  )
+
     logging.shutdown()
