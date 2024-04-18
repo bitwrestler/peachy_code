@@ -45,8 +45,11 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         logging.info(f"Recieved Prompt (IsStatusCheck->{request.IsStatusCheck()}): {str(request)}")
         qstruct = self.q.TryQueue(request)
         res = qstruct[1]
-        if not qstruct[0]: #if not queued, run it now
-            self._Submit(request, res)
+        if not qstruct[0]: #if can run immediately, run it now
+            try:
+                self._Submit(request, res)
+            finally:
+                self.q.RemoveQueued(res.ResultID)
         logging.info(f"Result -> {res}")
         return res
 
