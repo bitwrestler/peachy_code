@@ -4,8 +4,9 @@ import logging
 import server_pb2_grpc
 import server_pb2
 from KnowledgeServerQueue import KnowledgeServerQueue
-from server_pb2 import PromptType, ResponseType ,DiffRequest, DiffResult, Empty
+from server_pb2 import PromptType,DiffRequest, DiffResult, Empty
 from ServerCommon import ServerParams
+import server_pb2_pyi_extensions
 
 """
 Abstract server class
@@ -41,13 +42,12 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         raise NotImplementedError("_Submit is an abstract method")
 
     def Submit(self, request : DiffRequest, context) -> DiffResult:
-        logging.info(f"Recieved Prompt: {str(request)}")
-        try:
-            #TODO install queue
+        logging.info(f"Recieved Prompt (IsStatusCheck->{request.IsStatusCheck()}): {str(request)}")
+        qstruct = self.q.TryQueue(request)
+        res = qstruct[1]
+        if not qstruct[0]: #if not queued, run it now
             self._Submit(request, res)
-            logging.info(f"Result -> {res}")
-        finally:
-            self.q.RecordCompletion()
+        logging.info(f"Result -> {res}")
         return res
 
     def ChangeSettings(self, request : server_pb2.Settings, context):

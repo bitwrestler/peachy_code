@@ -1,40 +1,57 @@
 import threading
 import uuid
-from collections import deque
 from server_pb2 import DiffRequest, DiffResult, ResponseType
 import server_pb2_pyi_extensions
 from dataclasses import dataclass
 
-@dataclass
-class QueueItem:
-    Request : DiffRequest
-    Result : DiffResult
+#@dataclass
+#class QueueItem:
+#    Request : DiffRequest
+#    Result : DiffResult
 
 class KnowledgeServerQueue:
     def __init__(self, queue_size : int):
         self.size = queue_size
         self.lock = threading.Lock()
-        self.q = deque()
-        self.running = 0
+        self.q = {}
 
-    def shouldQueue(self):
-        return self.running >= self.size
+    def canRun(self):
+        return len(self.q.items) < self.size
     
-    def checkStatus(self, id : str):
-        f = filter(lambda e: e.Result and e.Result.ResultID == id, self.q)
-        try:
-            return next(f)
-        except StopIteration:
-            return None
+    def isQueued(self, id : str) -> bool:
+        return id in self.q
+    def removeQueued(self, id :str):
+        del self.q[id]
 
-    def TryQueue(self, request : DiffRequest, response : DiffResult = None):
+    @staticmethod
+    def _newID() -> str:
+        return str(uuid.uuid4())
+
+    @staticmethod
+    def initResult(id : str = None, t : ResponseType = ResponseType.ResponseType_COMPLETE):
+        id = id or KnowledgeServerQueue._newID()
+        return DiffResult(ResultID=id, ResultType=t)
+    
+    def queueIt(self, request : DiffRequest) -> DiffResult:
+        id = request.ResultID or KnowledgeServerQueue._newID()
+        request.ResultID = id
+        self.q[id] = request
+        return KnowledgeServerQueue.initResult(id=id, t=ResponseType.ResponseType_QUEUED)
+    
+    def TryQueue(self, request : DiffRequest):
         with self.lock:
-            if request.IsCheckStatus() and :
-                
-            if self.shouldQueue():
-                response = DiffResult(ResultID=str(uuid.uuid4()), ResultType=ResponseType.ResponseType_COMPLETE)
-
-    def RecordCompletion(self, isQueued : bool):
-        if isQueued:
-            with self.lock:
-                self.running = self.running - 1
+            if request.IsStatusCheck():
+                if self.isQueued(request.ResultID):
+                    if self.canRun():
+                        self.removeQueued(request.ResultID)
+                        return (False, KnowledgeServerQueue.initResult(id=request.ResultID))
+                    else:
+                        e = self.q[request.ResultID]
+                        return (True, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
+                else:
+                    return (False, KnowledgeServerQueue.initResult(id=request.ResultID))
+            else:
+                if self.canRun():
+                    return(False, KnowledgeServerQueue.initResult())
+                else:
+                    return (True,self.queueIt(request))
