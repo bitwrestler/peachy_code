@@ -2,12 +2,6 @@ import threading
 import uuid
 from server_pb2 import DiffRequest, DiffResult, ResponseType
 import server_pb2_pyi_extensions
-from dataclasses import dataclass
-
-#@dataclass
-#class QueueItem:
-#    Request : DiffRequest
-#    Result : DiffResult
 
 class KnowledgeServerQueue:
     def __init__(self, queue_size : int):
