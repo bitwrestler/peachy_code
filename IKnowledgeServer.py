@@ -46,6 +46,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         qstruct = self.q.TryQueue(request)
         res = qstruct[1]
         if qstruct[0]: #if can run immediately, run it now
+            #TODO this isn't working on queued client, returns no response
             try:
                 self._Submit(request, res)
             finally:
