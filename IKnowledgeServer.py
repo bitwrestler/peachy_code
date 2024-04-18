@@ -1,9 +1,10 @@
 import io
 import subprocess
 import logging
+import uuid
 import server_pb2_grpc
 import server_pb2
-from server_pb2 import PromptType, DiffRequest, Empty
+from server_pb2 import PromptType, ResponseType ,DiffRequest, DiffResult, Empty
 from ServerCommon import ServerParams
 
 """
@@ -35,9 +36,9 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         else:
             return "user"
     
-    def Submit(self, request : DiffRequest, context):
+    def Submit(self, request : DiffRequest, context) -> DiffResult:
         logging.info(f"Recieved Prompt: {str(request)}")
-        return None
+        return DiffResult(ResultID=uuid.uuid4(), ResultType=ResponseType.ResponseType_COMPLETE)
     
     def ChangeSettings(self, request : server_pb2.Settings, context):
         logging.info(f"Caught change in settings -> {request}")

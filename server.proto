@@ -12,9 +12,16 @@ service PeachyServer {
     rpc ChangeSettings(Settings) returns (Empty);
 }
 
+//The type of prompt being system or user
 enum PromptType {
     PromptType_USER = 0;
     PromptType_SYSTEM = 1;
+}
+
+//The type of response being completed or queued
+enum ResponseType {
+    ResponseType_COMPLETE = 0;
+    ResponseType_QUEUED = 1;
 }
 
 //The Prompt item (prompt type and string value)
@@ -29,12 +36,18 @@ message PromptItem {
 message DiffRequest {
     //Request prompt string
     repeated PromptItem Request=1;
+    //The unique result id returned by DiffResult in order to check the status of a queued request
+    string ResultID=2;
 }
 
 //The Response message
 message DiffResult {
     //String array result
     repeated string Result=1;
+    //Enum indicating the type of response
+    ResponseType ResultType=2;
+    //The unique result id for this request, can be used in the case of a queued request to check its status
+    string ResultID=3;
 }
 
 //Settings message for changing the server settings from the client
