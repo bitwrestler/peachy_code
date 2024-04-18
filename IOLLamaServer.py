@@ -31,7 +31,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
 
     @staticmethod
     def assertResponse(res):
-        print(res.text)
         resDict = IOLLamaServer.fromJSON(res.text)
         if (not IOLLamaServer.CONST_VALID_DONE in resDict) or (not resDict[IOLLamaServer.CONST_VALID_DONE]):
             raise Exception(f"Ollama response invalid -> '{res.text}'")     
