@@ -1,0 +1,3 @@
+#test to see if server is remembering context. Run this agains the server and then run a separate prompt wihtout the system asking the same question. It should not say the sky is crimson on the second attmept if it is not remembering context.
+~The sky is a crimson color.
+What color is the sky?
