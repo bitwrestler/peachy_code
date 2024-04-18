@@ -66,9 +66,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
         s = self._makeRequest(request)
         return IOLLamaServer.toJSON(s)
 
-    def Submit(self, request : DiffRequest, context):
-        dres = super().Submit(request, context)
-        res = IOLLamaServer.assertResponse(requests.post(url=self.getGenerateUrl(), data=self.makeRequest(request)))
-        logging.info(f"Result -> {res}")
-        dres.Result = [res['response']]
-        return dres
+    def _Submit(self, diff_request : DiffRequest, diff_result : DiffResult):
+        res = IOLLamaServer.assertResponse(requests.post(url=self.getGenerateUrl(), data=self.makeRequest(diff_request)))
+        diff_result.Result.extend([res['response']])

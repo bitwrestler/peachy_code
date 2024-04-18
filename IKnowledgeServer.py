@@ -36,10 +36,16 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
         else:
             return "user"
     
+    def _Submit(self, request : DiffRequest, result : DiffResult) -> None:
+        raise NotImplementedError("_submit is an abstract method")
+
     def Submit(self, request : DiffRequest, context) -> DiffResult:
         logging.info(f"Recieved Prompt: {str(request)}")
-        return DiffResult(ResultID=uuid.uuid4(), ResultType=ResponseType.ResponseType_COMPLETE)
-    
+        res = DiffResult(ResultID=str(uuid.uuid4()), ResultType=ResponseType.ResponseType_COMPLETE)
+        self._Submit(request, res)
+        logging.info(f"Result -> {res}")
+        return res
+
     def ChangeSettings(self, request : server_pb2.Settings, context):
         logging.info(f"Caught change in settings -> {request}")
         self.settings.TEMPERATURE = request.Temperature
