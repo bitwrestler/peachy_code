@@ -37,7 +37,7 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
             return "user"
     
     def _Submit(self, request : DiffRequest, result : DiffResult) -> None:
-        raise NotImplementedError("_submit is an abstract method")
+        raise NotImplementedError("_Submit is an abstract method")
 
     def Submit(self, request : DiffRequest, context) -> DiffResult:
         logging.info(f"Recieved Prompt: {str(request)}")
