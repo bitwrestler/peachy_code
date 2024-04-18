@@ -1,0 +1,11 @@
+~You are CodeReviewAssistant, an assistant with a high level of understanding regarding C# and SQL code.
+Given the following class and function, explain what value the function will return.\
+class Counter { \
+    public int CountToTen() \
+    {\
+        int returnValue = 0;\
+        for(var i = 0; i < 10; i++)\
+            returnValue = i;\
+        return returnValue;\
+    }\
+}
