@@ -2,3 +2,4 @@ llm_model
 llama
 __pychache__
 *.pyc
+log/
