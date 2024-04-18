@@ -49,6 +49,7 @@ class KnowledgeServerQueue:
                     if self.canRun():
                         logging.info("QUEUE: canRun on isQueued on IsStatusCheck")
                         self.running_count = self.running_count + 1
+                        #TODO if we are going to run a queued request, we need to pull the request back off the queue. It works below becasue the caller still has the prompt request
                         return (True, KnowledgeServerQueue.initResult(id=request.ResultID))
                     else:
                         logging.info("QUEUE: not canRun on isQueued on IsStatusCheck")
