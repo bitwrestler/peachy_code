@@ -64,14 +64,18 @@ def rpccall_ChangeTemperature(ip : str, newTemp : float):
 
 def handleQueueItem(proxy : PeachyServerStub, prompt : DiffRequest) -> DiffResult:
     tryp = prompt
+    did_wait = False
     while True:
         result : DiffResult = proxy.Submit( tryp )
         if result.ResultType == ResponseType.ResponseType_QUEUED:
             tryp = DiffRequest(ResultID=result.ResultID)
             print('.', end = '')
-            logging.info('Polling request...')
+            logging.info(f'Request {result.ResultID} queued awaiting execution...')
             time.sleep(1.0)
+            did_wait = True
         else:
+            if did_wait:
+                print(".")
             return result
 
 def rpccall_Prompt(prompt : DiffRequest, ip : str) -> DiffResult:
