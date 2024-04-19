@@ -24,6 +24,13 @@ class CodeLLamaDirectServer(IKnowledgeServer):
         os.environ['MASTER_ADDR'] = '127.0.0.1'
         os.environ['MASTER_PORT'] = '11002'
     
+    @staticmethod
+    def ConvertRole(role : PromptType) -> str:
+        if role == PromptType.PromptType_SYSTEM:
+            return "system"
+        else:
+            return "user"
+
     def Start(self):
         path = self.settings.LLM_DIR
         self._single_generator = Llama.build(
@@ -37,7 +44,7 @@ class CodeLLamaDirectServer(IKnowledgeServer):
         p = item.Prompt
         if not p.endswith('.'):
             p = p + '.'
-        return {"role" : IKnowledgeServer.ConvertRole(item.Type), "content" : p}
+        return {"role" : CodeLLamaDirectServer.ConvertRole(item.Type), "content" : p}
 
     def ConvertPromptsToInstructions(self, request : DiffRequest):
         currentList = []

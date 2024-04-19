@@ -39,9 +39,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
     def Start(self):
         logging.info("Starting OLLama CodeKnowledge Proxy...")
         IOLLamaServer.assertResponse(requests.post( url=self.getGenerateUrl(), data = IOLLamaServer.toJSON(self.initRequest()) ))
-
-    def Shutdown(self, request, context):
-        pass
     
     def ModelName(self) -> str:
         raise NotImplementedError('ModelName required')

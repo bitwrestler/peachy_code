@@ -3,6 +3,7 @@ import subprocess
 import logging
 import server_pb2_grpc
 import server_pb2
+import abc
 from KnowledgeServerQueue import KnowledgeServerQueue
 from server_pb2 import PromptType,DiffRequest, DiffResult, Empty
 from ServerCommon import ServerParams
@@ -11,14 +12,15 @@ import server_pb2_pyi_extensions
 """
 Abstract server class
 """
-class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
+class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer, metaclass=abc.ABCMeta):
 
     def __init__(self,settings : ServerParams):
         self.settings = settings
         self.q = KnowledgeServerQueue(queue_size=settings.NUM_NODES)
 
+    @abc.abstractmethod
     def Start(self):
-        raise NotImplementedError('Method not implemented!')
+        pass
     
     def GPUStats(self, request : server_pb2.DiffRequest, context):
         logging.info("Received GPUStats request")
@@ -30,16 +32,10 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
     
     def Temperature(self) -> float:
         return self.settings.TEMPERATURE
-
-    @staticmethod
-    def ConvertRole(role : PromptType) -> str:
-        if role == PromptType.PromptType_SYSTEM:
-            return "system"
-        else:
-            return "user"
     
+    @abc.abstractmethod
     def _Submit(self, request : DiffRequest, result : DiffResult) -> None:
-        raise NotImplementedError("_Submit is an abstract method")
+        pass
 
     def Submit(self, request : DiffRequest, context) -> DiffResult:
         logging.info(f"Recieved Prompt (IsStatusCheck->{request.IsStatusCheck()}): {str(request)}")
@@ -52,6 +48,9 @@ class IKnowledgeServer(server_pb2_grpc.PeachyServerServicer):
                 self.q.RemoveQueued(res.ResultID)
         logging.info(f"Result -> {res}")
         return res
+
+    def Shutdown(self, request, context):
+        pass 
 
     def ChangeSettings(self, request : server_pb2.Settings, context):
         logging.info(f"Caught change in settings -> {request}")
