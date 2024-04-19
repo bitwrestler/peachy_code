@@ -31,7 +31,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
 
     @staticmethod
     def assertResponse(res):
-        print(res.text)
         resDict = IOLLamaServer.fromJSON(res.text)
         if (not IOLLamaServer.CONST_VALID_DONE in resDict) or (not resDict[IOLLamaServer.CONST_VALID_DONE]):
             raise Exception(f"Ollama response invalid -> '{res.text}'")     
@@ -66,8 +65,6 @@ class IOLLamaServer(IKnowledgeServer.IKnowledgeServer):
         s = self._makeRequest(request)
         return IOLLamaServer.toJSON(s)
 
-    def Submit(self, request : DiffRequest, context):
-        super().Submit(request, context)
-        res = IOLLamaServer.assertResponse(requests.post(url=self.getGenerateUrl(), data=self.makeRequest(request)))
-        logging.info(f"Result -> {res}")
-        return DiffResult(Result=[res['response']])
+    def _Submit(self, diff_request : DiffRequest, diff_result : DiffResult):
+        res = IOLLamaServer.assertResponse(requests.post(url=self.getGenerateUrl(), data=self.makeRequest(diff_request)))
+        diff_result.Result.extend([res['response']])

@@ -5,9 +5,10 @@ import argparse
 import grpc
 import logging
 import datetime
+import time
 from timeit import default_timer as timer
 from server_pb2_grpc import PeachyServerStub 
-from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType, Settings
+from server_pb2 import DiffRequest, DiffResult, PromptItem, PromptType, Settings, ResponseType
 import server_pb2_pyi_extensions
 from ServerCommon import LISTEN_IF_PORT
 
@@ -61,13 +62,28 @@ def rpccall_ChangeTemperature(ip : str, newTemp : float):
         settingsChange = Settings(Temperature=newTemp)
         proxy.ChangeSettings(settingsChange)
 
+def handleQueueItem(proxy : PeachyServerStub, prompt : DiffRequest) -> DiffResult:
+    tryp = prompt
+    did_wait = False
+    while True:
+        result : DiffResult = proxy.Submit( tryp )
+        if result.ResultType == ResponseType.ResponseType_QUEUED:
+            tryp = DiffRequest(ResultID=result.ResultID)
+            print('.', end = '')
+            logging.info(f'Request {result.ResultID} queued awaiting execution...')
+            time.sleep(1.0)
+            did_wait = True
+        else:
+            if did_wait:
+                print(".")
+            return result
+
 def rpccall_Prompt(prompt : DiffRequest, ip : str) -> DiffResult:
     with rpccall_address(ip) as channel:
         proxy = PeachyServerStub(channel)
         print(f"Sending to {ip}: {prompt}")
-        logging.info("REQUEST -> " + str(prompt) + "\n")
-        result : DiffResult = proxy.Submit( prompt )
-        return result
+        logging.info("REQUEST -> " + str(prompt) + "\n")    
+        return handleQueueItem(proxy, prompt)
 
 def read_stdin():
     out = []

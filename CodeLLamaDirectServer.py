@@ -53,21 +53,17 @@ class CodeLLamaDirectServer(IKnowledgeServer):
             else:
                 inSystem+=1
 
-    def Submit(self, request : DiffRequest, context):
-        super().Submit(request, context)
+    def _Submit(self, diff_request : DiffRequest, diff_result : DiffResult) -> None:
         if self._single_generator:
             generator = copy.deepcopy(self._single_generator)
             results = generator.chat_completion(
-                list(self.ConvertPromptsToInstructions(request)),
+                list(self.ConvertPromptsToInstructions(diff_request)),
                 max_gen_len=self.DEFAULT_GEN_LEN,
                 temperature=self.Temperature(),
                 top_p=self.DEFAULT_THRESHOLD
             )
             generator = None
-            logging.info(f"Result -> {results}")
-            return DiffResult(Result=[result['generation']['content'] for result in results])
-        else:
-            return DiffResult(Result=[])
+            diff_result.Result.extend([result['generation']['content'] for result in results])
 
     def Shutdown(self, request, context):
         self._single_generator = None
