@@ -49,23 +49,20 @@ class KnowledgeServerQueue:
                     if self.canRun():
                         logging.info("QUEUE: canRun on isQueued on IsStatusCheck")
                         self.running_count = self.running_count + 1
-                        #TODO if we are going to run a queued request, we need to pull the request back off the queue. It works below becasue the caller still has the prompt request
-                        return (True, KnowledgeServerQueue.initResult(id=request.ResultID))
+                        return (self.q[request.ResultID], KnowledgeServerQueue.initResult(id=request.ResultID))
                     else:
                         logging.info("QUEUE: not canRun on isQueued on IsStatusCheck")
-                        e = self.q[request.ResultID]
-                        return (False, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
+                        return (None, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
                 else:
                     logging.info("QUEUE: not id queued on IsStatusCheck")
-                    #this should not impact running_count and COULD be an exception
-                    return (True, KnowledgeServerQueue.initResult(id=request.ResultID))
+                    raise Exception(f"Unknown ResultID {request.ResultID}")
             else:
                 logging.info("QUEUE: not IsStatusCheck")
                 if self.canRun():
                     logging.info("QUEUE: canRun")
                     tmpres = self.queueIt(request)
                     self.running_count = self.running_count + 1
-                    return(True, KnowledgeServerQueue.initResult(id=tmpres.ResultID))
+                    return(request, KnowledgeServerQueue.initResult(id=tmpres.ResultID))
                 else:
                     logging.info("QUEUE: not canRun -> queued")
-                    return (False,self.queueIt(request))
+                    return (None,self.queueIt(request))
