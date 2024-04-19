@@ -43,26 +43,26 @@ class KnowledgeServerQueue:
     def TryQueue(self, request : DiffRequest):
         with self.lock:
             if request.IsStatusCheck():
-                logging.info("QUEUE: IsStatusCheck")
+                logging.debug("QUEUE: IsStatusCheck")
                 if self.isQueued(request.ResultID):
-                    logging.info("QUEUE: isQueued on IsStatusCheck")
+                    logging.debug("QUEUE: isQueued on IsStatusCheck")
                     if self.canRun():
-                        logging.info("QUEUE: canRun on isQueued on IsStatusCheck")
+                        logging.debug("QUEUE: canRun on isQueued on IsStatusCheck")
                         self.running_count = self.running_count + 1
                         return (self.q[request.ResultID], KnowledgeServerQueue.initResult(id=request.ResultID))
                     else:
-                        logging.info("QUEUE: not canRun on isQueued on IsStatusCheck")
+                        logging.debug("QUEUE: not canRun on isQueued on IsStatusCheck")
                         return (None, KnowledgeServerQueue.initResult(id=request.ResultID, t = ResponseType.ResponseType_QUEUED))
                 else:
-                    logging.info("QUEUE: not id queued on IsStatusCheck")
+                    logging.debug("QUEUE: not id queued on IsStatusCheck")
                     raise Exception(f"Unknown ResultID {request.ResultID}")
             else:
-                logging.info("QUEUE: not IsStatusCheck")
+                logging.debug("QUEUE: not IsStatusCheck")
                 if self.canRun():
-                    logging.info("QUEUE: canRun")
+                    logging.debug("QUEUE: canRun")
                     tmpres = self.queueIt(request)
                     self.running_count = self.running_count + 1
                     return(request, KnowledgeServerQueue.initResult(id=tmpres.ResultID))
                 else:
-                    logging.info("QUEUE: not canRun -> queued")
+                    logging.debug("QUEUE: not canRun -> queued")
                     return (None,self.queueIt(request))
