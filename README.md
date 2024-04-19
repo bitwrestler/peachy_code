@@ -12,6 +12,9 @@ Specifically, I am trying to determine the feasiblity that an LLM can explain th
 Peachy Code Server is a client-server architecture that supports direct loading of a codellama via PyTorch or can act as a proxy for Ollama.
 The codellama model is not included and must be obtained separately. The same is true of Ollama.
 
+Note: This client-server architecture is independent of the goals above. With a little adaptation, it could be used with any model and any prompts.
+
+
 ## Server
 ### Run in standard direct mode
 Usage: python PeachyCodeServer.py
